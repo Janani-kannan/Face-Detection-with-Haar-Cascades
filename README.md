@@ -55,76 +55,200 @@ iv) Perform face detection with label in real-time video from webcam.
 - Step 6: Release video capture and destroy all OpenCV windows  
 
 ## PROGRAM
-
 ```
 import cv2
 import matplotlib.pyplot as plt
-%matplotlib inline
+import numpy as np
+```
+```
+model = cv2.imread("C:\\Users\\admin\\Downloads\\image_01.png",cv2.IMREAD_GRAYSCALE)
+withglass = cv2.imread('C:\\Users\\admin\\Downloads\\image_02.png',cv2.IMREAD_GRAYSCALE)
+group = cv2.imread('C:\\Users\\admin\\Downloads\\image_03.png',cv2.IMREAD_GRAYSCALE)
+wo_glass1 = cv2.resize(model, (1000, 1000)) 
+w_glass1 = cv2.resize(withglass, (1000, 1000))
+group1 = cv2.resize(group, (1000, 1000))
+```
+```
 
-withglass = cv2.imread("C:\\Users\\admin\\Downloads\\single photo.webp", 0)
-group = cv2.imread("C:\\Users\\admin\\Downloads\\group photo.jpg", 0)
-
-plt.imshow(withglass, cmap='gray')
-plt.title("With Glasses")
+plt.figure(figsize=(15,10))
+plt.subplot(1,3,1);plt.imshow(w_glass1,cmap='gray');plt.title('With Glasses');plt.axis('off')
+plt.subplot(1,3,2);plt.imshow(wo_glass1,cmap='gray');plt.title('Without Glasses');plt.axis('off')
+plt.subplot(1,3,3);plt.imshow(group1,cmap='gray');plt.title('Group Image');plt.axis('off')
 plt.show()
+```
+```
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+def detect_and_display(image):
+    faces = face_cascade.detectMultiScale(image, scaleFactor=1.1, minNeighbors=5)
+    for (x, y, w, h) in faces:
+        cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 10)
+    plt.imshow(image, cmap='gray')
+    plt.axis('off')
+    plt.show()
+```
+```
+import cv2
+from matplotlib import pyplot as plt
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+if face_cascade.empty():
+    print("Error: Cascade file not loaded properly!")
+else:
+    print("Cascade loaded successfully.")
+w_glass1 = cv2.imread('C:\\Users\\admin\\Downloads\\image_02.png')  # <-- replace with your image filename
 
-plt.imshow(group, cmap='gray')
-plt.title("Group Image")
-plt.show()
+if w_glass1 is None:
+    print("Error: Image not found. Check the filename or path.")
+else:
+    print("Image loaded successfully.")
+def detect_and_display(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+    for (x, y, w, h) in faces:
+        cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 3)
+    
+    return image
+if w_glass1 is not None and not face_cascade.empty():
+    result = detect_and_display(w_glass1)
+    plt.imshow(cv2.cvtColor(result, cv2.COLOR_BGR2RGB))
+    plt.axis('off')
+    plt.show()
+```
+```
+import cv2
+from matplotlib import pyplot as plt
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+eye_cascade  = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+if face_cascade.empty():
+    print("Error: Face cascade not loaded properly!")
+if eye_cascade.empty():
+    print("Error: Eye cascade not loaded properly!")
+# (Change the filenames as per your actual image files)
+w_glass = cv2.imread('C:\\Users\\admin\\Downloads\\image_02.png')
+wo_glass = cv2.imread("C:\\Users\\admin\\Downloads\\image_01.png")
+group = cv2.imread('C:\\Users\\admin\\Downloads\\image_03.png')
+def detect_eyes(image):
+    face_img = image.copy()
+    gray = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)
+    eyes = eye_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+    
+    for (ex, ey, ew, eh) in eyes:
+        cv2.rectangle(face_img, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
+    
+    return face_img
+if w_glass is not None:
+    w_glass_result = detect_eyes(w_glass)
+    plt.imshow(cv2.cvtColor(w_glass_result, cv2.COLOR_BGR2RGB))
+    plt.title("With Glasses - Eye Detection")
+    plt.axis("off")
+    plt.show()
 
+if wo_glass is not None:
+    wo_glass_result = detect_eyes(wo_glass)
+    plt.imshow(cv2.cvtColor(wo_glass_result, cv2.COLOR_BGR2RGB))
+    plt.title("Without Glasses - Eye Detection")
+    plt.axis("off")
+    plt.show()
+
+if group is not None:
+    group_result = detect_eyes(group)
+    plt.imshow(cv2.cvtColor(group_result, cv2.COLOR_BGR2RGB))
+    plt.title("Group - Eye Detection")
+    plt.axis("off")
+    plt.show()
+```
+```
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+cap = cv2.VideoCapture(0)
+
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        break
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+    for (x, y, w, h) in faces:
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+    plt.imshow(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+    plt.axis("on")
+    plt.title("Video Face Detection")
+    plt.show()
+    break
+
+cap.release()
+```
+```
+from IPython.display import clear_output, display
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+```
+```
+def new_detect(gray, frame):
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    for (x, y, w, h) in faces:
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        roi_gray = gray[y:y + h, x:x + w]
+        roi_color = frame[y:y + h, x:x + w]
+        eyes = eye_cascade.detectMultiScale(roi_gray)
+        for (ex, ey, ew, eh) in eyes:
+            cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
+    return frame
+```
+```
+video_capture = cv2.VideoCapture(0)
+captured_frame = None   
 
-if face_cascade.empty():
-    raise IOError("Error loading face cascade XML file")
-if eye_cascade.empty():
-    raise IOError("Error loading eye cascade XML file")
+while True:
+    ret, frame = video_capture.read()
+    if not ret:
+        print("No frame captured from camera.")
+        break
 
-def detect_face(img, scaleFactor=1.1, minNeighbors=5):
-    face_img = img.copy()
-    face_rects = face_cascade.detectMultiScale(face_img, scaleFactor=scaleFactor, minNeighbors=minNeighbors)
-    for (x, y, w, h) in face_rects:
-        cv2.rectangle(face_img, (x, y), (x + w, y + h), (255, 255, 255), 2)
-    return face_img
-
-def detect_eyes(img):
-    face_img = img.copy()
-    eyes = eye_cascade.detectMultiScale(face_img)
-    for (x, y, w, h) in eyes:
-        cv2.rectangle(face_img, (x, y), (x + w, y + h), (255, 255, 255), 2)
-    return face_img
-
-result_withglass_faces = detect_face(withglass)
-plt.imshow(result_withglass_faces, cmap='gray')
-plt.title("Faces in With Glasses Image")
-plt.show()
-
-result_group_faces = detect_face(group)
-plt.imshow(result_group_faces, cmap='gray')
-plt.title("Faces in Group Image")
-plt.show()
-
-result_withglass_eyes = detect_eyes(withglass)
-plt.imshow(result_withglass_eyes, cmap='gray')
-plt.title("Eyes in With Glasses Image")
-plt.show()
-
-result_group_eyes = detect_eyes(group)
-plt.imshow(result_group_eyes, cmap='gray')
-plt.title("Eyes in Group Image")
-plt.show()
-
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    canvas = new_detect(gray, frame)
+    clear_output(wait=True)
+    plt.imshow(cv2.cvtColor(canvas, cv2.COLOR_BGR2RGB))
+    plt.axis("off")
+    plt.title("Video - Face & Eye Detection")
+    display(plt.gcf())
+    captured_frame = canvas.copy()  
+    break
+```
+```
+video_capture.release()
+if captured_frame is not None and captured_frame.size > 0:
+    cv2.imwrite('captured_face_eye.png', captured_frame)
+    captured_image = cv2.imread('captured_face_eye.png', cv2.IMREAD_GRAYSCALE)
+    plt.imshow(captured_image, cmap='gray')
+    plt.title('Captured Face with Eye Detection')
+    plt.axis('off')
+    plt.show()
+else:
+    print("No valid frame to save.")
 ```
 
 ## OUTPUT
 
-<img width="1054" height="790" alt="image" src="https://github.com/user-attachments/assets/a16ef4ff-12a0-43ca-bfb7-5fbc395cd81a" />
+<img width="1042" height="374" alt="image" src="https://github.com/user-attachments/assets/4495f020-4e05-48e3-821f-6cc5744c8158" />
 
 
-<img width="1060" height="774" alt="image" src="https://github.com/user-attachments/assets/b7bc5ca4-fdc8-46ec-81c1-7288f4c97028" />
+<img width="428" height="421" alt="image" src="https://github.com/user-attachments/assets/a462633c-26c8-4929-9117-72a39185df0b" />
 
 
-<img width="1073" height="784" alt="image" src="https://github.com/user-attachments/assets/162a9c27-5240-4308-ab5c-5313555f4eef" />
+<img width="479" height="395" alt="image" src="https://github.com/user-attachments/assets/fb40e8e2-4914-4a62-a292-5747fec7bf27" />
+
+
+<img width="558" height="720" alt="image" src="https://github.com/user-attachments/assets/765c5015-ff87-42f7-89ee-abf975ad4718" />
+
+
+<img width="642" height="441" alt="image" src="https://github.com/user-attachments/assets/e7a4b306-85eb-41bd-bc81-0f502cb06a93" />
+
+
+<img width="519" height="801" alt="image" src="https://github.com/user-attachments/assets/d8b5e0ab-20d0-45aa-b64e-7b023c8425e6" />
+
+
+<img width="512" height="402" alt="image" src="https://github.com/user-attachments/assets/43ab2853-5615-4fa8-bc9f-070acf2868eb" />
+
+
 
 ## RESULT
 
